@@ -1,0 +1,64 @@
+version: '3'
+services:
+  grafana:
+    # if customization required
+    # example: https://github.com/grafana/grafana/blob/master/packaging/docker/ubuntu.Dockerfile
+    # build:
+    #   context: .
+    #   dockerfile: Dockfile.grafana
+    image: grafana/grafana:latest-ubuntu
+    container_name: grafana
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./data/grafana:/etc/grafana
+    links:
+      - graphite:graphite
+      - prometheus:prometheus
+  graphite:
+    # if customization required
+    # example: https://github.com/graphite-project/docker-graphite-statsd/blob/master/Dockerfile
+    # build:
+    #   context: .
+    #   dockerfile: Dockfile.graphite
+    image: graphiteapp/graphite-statsd:latest
+    container_name: graphite
+    ports:
+      - '80:80'
+      - '2003-2004:2003-2004'
+      - '2023-2024:2023-2024'
+      - '8125:8125/udp'
+      - '8126:8126'
+  prometheus:
+    # if customization required
+    # example: https://prometheus.io/docs/prometheus/latest/installation/#using-docker
+    # example: https://github.com/prometheus/prometheus/blob/master/Dockerfile
+    # build:
+    #   context: .
+    #   dockerfile: Dockfile.prometheus
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./data/prometheus:/etc/prometheus
+  salt:
+    # if customization required
+    # example: https://github.com/saltstack/saltdocker/blob/master/Dockerfile.j2
+    # build:
+    #   context: .
+    #   dockerfile: Dockfile.salt
+    image: saltstack/salt:latest
+    container_name: salt
+    ports:
+      - '4505-4506:4505-4506'
+      - '8000:8000'
+      - '9100:9100'
+    volumes:
+      - ./data/salt/salt:/srv/salt
+      - ./data/salt/pillar:/srv/pillar
+      - ./data/salt/scripts:/srv/scripts
+    links:
+      - graphite:graphite
+      - prometheus:prometheus
+    command: sh -c /srv/scripts/post-init.sh

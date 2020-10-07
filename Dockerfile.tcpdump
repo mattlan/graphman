@@ -1,0 +1,5 @@
+# docker build -t tcpdump -f Dockerfile.tcpdump .
+# docker run --tty --rm --net=container:[CONTAINER_NAME] tcpdump [tcpdump ARGS]
+FROM ubuntu 
+RUN apt-get update && apt-get install -y tcpdump 
+CMD tcpdump -i eth0 
